@@ -39,7 +39,8 @@ if __name__ == '__main__':
         "models/TabRec/TableMaster/*",
         "models/TabRec/StructEqTable/*",
     ]
-    model_dir = snapshot_download('opendatalab/PDF-Extract-Kit-1.0', allow_patterns=mineru_patterns)
+    # 已经没有 allow_patterns 参数了, allow_patterns=mineru_patterns
+    model_dir = snapshot_download('opendatalab/PDF-Extract-Kit-1.0')
     layoutreader_model_dir = snapshot_download('ppaanngggg/layoutreader')
     model_dir = model_dir + '/models'
     print(f'model_dir is: {model_dir}')
