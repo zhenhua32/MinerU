@@ -26,6 +26,8 @@ from magic_pdf.model.sub_modules.ocr.paddleocr.ocr_utils import get_adjusted_mfd
 
 
 class CustomPEKModel:
+    """模型类, 表示 pdf_extract_kit, 一个全功能的模型类
+    """
 
     def __init__(self, ocr: bool = False, show_log: bool = False, **kwargs):
         """
@@ -45,23 +47,23 @@ class CustomPEKModel:
             self.configs = yaml.load(f, Loader=yaml.FullLoader)
         # 初始化解析配置
 
-        # layout config
+        # layout config 布局
         self.layout_config = kwargs.get("layout_config")
         self.layout_model_name = self.layout_config.get("model", MODEL_NAME.DocLayout_YOLO)
 
-        # formula config
+        # formula config 公式
         self.formula_config = kwargs.get("formula_config")
         self.mfd_model_name = self.formula_config.get("mfd_model", MODEL_NAME.YOLO_V8_MFD)
         self.mfr_model_name = self.formula_config.get("mfr_model", MODEL_NAME.UniMerNet_v2_Small)
-        self.apply_formula = self.formula_config.get("enable", True)
+        self.apply_formula = self.formula_config.get("enable", True)  # 公式默认开的
 
-        # table config
+        # table config 表格
         self.table_config = kwargs.get("table_config")
-        self.apply_table = self.table_config.get("enable", False)
+        self.apply_table = self.table_config.get("enable", False)  # 表格默认没开
         self.table_max_time = self.table_config.get("max_time", TABLE_MAX_TIME_VALUE)
         self.table_model_name = self.table_config.get("model", MODEL_NAME.RAPID_TABLE)
 
-        # ocr config
+        # ocr config 文字识别
         self.apply_ocr = ocr
         self.lang = kwargs.get("lang", None)
 

@@ -39,6 +39,8 @@ PP_DET_DIRECTORY = ".paddleocr/whl/det/ch/ch_PP-OCRv4_det_infer"
 
 
 class MODEL_NAME:
+    """定义了模型的默认值
+    """
     # pp table structure algorithm
     TABLE_MASTER = "tablemaster"
     # struct eqtable

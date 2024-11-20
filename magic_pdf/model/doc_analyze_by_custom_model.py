@@ -72,6 +72,7 @@ class ModelSingleton:
     def get_model(self, ocr: bool, show_log: bool, lang=None, layout_model=None, formula_enable=None, table_enable=None):
         key = (ocr, show_log, lang, layout_model, formula_enable, table_enable)
         if key not in self._models:
+            # 模型初始化
             self._models[key] = custom_model_init(ocr=ocr, show_log=show_log, lang=lang, layout_model=layout_model,
                                                   formula_enable=formula_enable, table_enable=table_enable)
         return self._models[key]
@@ -79,8 +80,21 @@ class ModelSingleton:
 
 def custom_model_init(ocr: bool = False, show_log: bool = False, lang=None,
                       layout_model=None, formula_enable=None, table_enable=None):
+    """获取模型
 
-    model = None
+    Args:
+        ocr (bool, optional): _description_. Defaults to False.
+        show_log (bool, optional): _description_. Defaults to False.
+        lang (_type_, optional): _description_. Defaults to None.
+        layout_model (_type_, optional): _description_. Defaults to None.
+        formula_enable (_type_, optional): _description_. Defaults to None.
+        table_enable (_type_, optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
+
+    model = None  # 模型类型
 
     if model_config.__model_mode__ == "lite":
         logger.warning("The Lite mode is provided for developers to conduct testing only, and the output quality is "
@@ -95,11 +109,13 @@ def custom_model_init(ocr: bool = False, show_log: bool = False, lang=None,
             from magic_pdf.model.pp_structure_v2 import CustomPaddleModel
             custom_model = CustomPaddleModel(ocr=ocr, show_log=show_log, lang=lang)
         elif model == MODEL.PEK:
+            # 默认用的是这个
             from magic_pdf.model.pdf_extract_kit import CustomPEKModel
             # 从配置文件读取model-dir和device
             local_models_dir = get_local_models_dir()
             device = get_device()
 
+            # 获取一些配置, 并可以用传入的参数覆盖
             layout_config = get_layout_config()
             if layout_model is not None:
                 layout_config["model"] = layout_model
@@ -112,6 +128,7 @@ def custom_model_init(ocr: bool = False, show_log: bool = False, lang=None,
             if table_enable is not None:
                 table_config["enable"] = table_enable
 
+            # 模型参数
             model_input = {
                             "ocr": ocr,
                             "show_log": show_log,
@@ -139,10 +156,27 @@ def custom_model_init(ocr: bool = False, show_log: bool = False, lang=None,
 def doc_analyze(pdf_bytes: bytes, ocr: bool = False, show_log: bool = False,
                 start_page_id=0, end_page_id=None, lang=None,
                 layout_model=None, formula_enable=None, table_enable=None):
+    """文档解析
+
+    Args:
+        pdf_bytes (bytes): pdf 二进制内容
+        ocr (bool, optional): 是否使用 ocr. Defaults to False.
+        show_log (bool, optional): 显示日志. Defaults to False.
+        start_page_id (int, optional): 开始页数. Defaults to 0.
+        end_page_id (_type_, optional): 结束页数. Defaults to None.
+        lang (_type_, optional): 语言. Defaults to None.
+        layout_model (_type_, optional): layout 模型. Defaults to None.
+        formula_enable (_type_, optional): 启用公式识别. Defaults to None.
+        table_enable (_type_, optional): 启用表格识别. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
 
     if lang == "":
         lang = None
 
+    # 模型管理器的单例
     model_manager = ModelSingleton()
     custom_model = model_manager.get_model(ocr, show_log, lang, layout_model, formula_enable, table_enable)
 
