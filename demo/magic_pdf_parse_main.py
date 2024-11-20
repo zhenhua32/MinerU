@@ -22,7 +22,6 @@ def json_md_dump(
         orig_model_list,
 ):
     # 写入模型结果到 model.json
-
     md_writer.write(
         content=json.dumps(orig_model_list, ensure_ascii=False, indent=4),
         path=f"{pdf_name}_model.json"
@@ -34,7 +33,7 @@ def json_md_dump(
         path=f"{pdf_name}_middle.json"
     )
 
-    # text文本结果写入到 conent_list.json
+    # text文本结果写入到 content_list.json
     md_writer.write(
         content=json.dumps(content_list, ensure_ascii=False, indent=4),
         path=f"{pdf_name}_content_list.json"
@@ -130,9 +129,11 @@ def pdf_parse_main(
         content_list = pipe.pipe_mk_uni_format(image_path_parent, drop_mode="none")
         md_content = pipe.pipe_mk_markdown(image_path_parent, drop_mode="none")
 
+        # 写入 json 和 md 文件
         if is_json_md_dump:
             json_md_dump(pipe, md_writer, pdf_name, content_list, md_content, orig_model_list)
 
+        # 可视化
         if is_draw_visualization_bbox:
             draw_visualization_bbox(pipe.pdf_mid_data['pdf_info'], pdf_bytes, output_path, pdf_name)
 

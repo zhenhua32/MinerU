@@ -13,7 +13,10 @@ try:
     jso_useful_key = {"_pdf_type": "", "model_list": []}
     local_image_dir = os.path.join(current_script_dir, 'images')
     image_dir = str(os.path.basename(local_image_dir))
+
+    # 初始化图片读写器
     image_writer = DiskReaderWriter(local_image_dir)
+    # 初始化管道
     pipe = UNIPipe(pdf_bytes, jso_useful_key, image_writer)
     pipe.pipe_classify()
     pipe.pipe_analyze()

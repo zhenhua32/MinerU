@@ -12,10 +12,29 @@ from magic_pdf.user_api import parse_union_pdf, parse_ocr_pdf
 
 
 class UNIPipe(AbsPipe):
+    """主要暴露的类, 重点看一下
+
+    Args:
+        AbsPipe (_type_): _description_
+    """
 
     def __init__(self, pdf_bytes: bytes, jso_useful_key: dict, image_writer: AbsReaderWriter, is_debug: bool = False,
                  start_page_id=0, end_page_id=None, lang=None,
                  layout_model=None, formula_enable=None, table_enable=None):
+        """参数还是挺多的, 注释下
+
+        Args:
+            pdf_bytes (bytes): pdf 二进制内容
+            jso_useful_key (dict): 字典, 示例数据为 {"_pdf_type": "", "model_list": []}  model_list 是模型结果
+            image_writer (AbsReaderWriter): 图像写入器
+            is_debug (bool, optional): 开启 debug 模式. Defaults to False.
+            start_page_id (int, optional): 起始页索引. Defaults to 0.
+            end_page_id (_type_, optional): 结束页索引. Defaults to None.
+            lang (_type_, optional): 语言. Defaults to None.
+            layout_model (_type_, optional): layout 模型. Defaults to None.
+            formula_enable (_type_, optional): 是否启用公式识别. Defaults to None.
+            table_enable (_type_, optional): 是否启用表格识别. Defaults to None.
+        """
         self.pdf_type = jso_useful_key["_pdf_type"]
         super().__init__(pdf_bytes, jso_useful_key["model_list"], image_writer, is_debug, start_page_id, end_page_id,
                          lang, layout_model, formula_enable, table_enable)
@@ -25,9 +44,14 @@ class UNIPipe(AbsPipe):
             self.input_model_is_empty = False
 
     def pipe_classify(self):
+        """流程第一步, 识别 pdf 类型
+        """
         self.pdf_type = AbsPipe.classify(self.pdf_bytes)
 
     def pipe_analyze(self):
+        """流程第二步, 文档解析, 获取模型结果
+        """
+        # 就是只改变了一个 ocr 参数
         if self.pdf_type == self.PIP_TXT:
             self.model_list = doc_analyze(self.pdf_bytes, ocr=False,
                                           start_page_id=self.start_page_id, end_page_id=self.end_page_id,
@@ -40,6 +64,9 @@ class UNIPipe(AbsPipe):
                                           formula_enable=self.formula_enable, table_enable=self.table_enable)
 
     def pipe_parse(self):
+        """流程第三步, 获取中间结果
+        """
+        # 根据 pdf 类型, 调用不同的解析方法
         if self.pdf_type == self.PIP_TXT:
             self.pdf_mid_data = parse_union_pdf(self.pdf_bytes, self.model_list, self.image_writer,
                                                 is_debug=self.is_debug, input_model_is_empty=self.input_model_is_empty,
@@ -53,11 +80,30 @@ class UNIPipe(AbsPipe):
                                               lang=self.lang)
 
     def pipe_mk_uni_format(self, img_parent_path: str, drop_mode=DropMode.NONE_WITH_REASON):
+        """获取 txt 格式的结果
+
+        Args:
+            img_parent_path (str): _description_
+            drop_mode (_type_, optional): _description_. Defaults to DropMode.NONE_WITH_REASON.
+
+        Returns:
+            _type_: _description_
+        """
         result = super().pipe_mk_uni_format(img_parent_path, drop_mode)
         logger.info("uni_pipe mk content list finished")
         return result
 
     def pipe_mk_markdown(self, img_parent_path: str, drop_mode=DropMode.WHOLE_PDF, md_make_mode=MakeMode.MM_MD):
+        """获取 markdown 文本
+
+        Args:
+            img_parent_path (str): 图片目录
+            drop_mode (_type_, optional): _description_. Defaults to DropMode.WHOLE_PDF.
+            md_make_mode (_type_, optional): _description_. Defaults to MakeMode.MM_MD.
+
+        Returns:
+            _type_: _description_
+        """
         result = super().pipe_mk_markdown(img_parent_path, drop_mode, md_make_mode)
         logger.info(f"uni_pipe mk {md_make_mode} finished")
         return result

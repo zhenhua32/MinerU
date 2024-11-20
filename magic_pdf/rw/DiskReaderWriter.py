@@ -9,6 +9,7 @@ class DiskReaderWriter(AbsReaderWriter):
         self.encoding = encoding
 
     def read(self, path, mode=AbsReaderWriter.MODE_TXT):
+        """读取文件内容"""
         if os.path.isabs(path):
             abspath = path
         else:
@@ -26,6 +27,16 @@ class DiskReaderWriter(AbsReaderWriter):
             raise ValueError("Invalid mode. Use 'text' or 'binary'.")
 
     def write(self, content, path, mode=AbsReaderWriter.MODE_TXT):
+        """写入文件
+
+        Args:
+            content (_type_): _description_
+            path (_type_): _description_
+            mode (_type_, optional): _description_. Defaults to AbsReaderWriter.MODE_TXT.
+
+        Raises:
+            ValueError: _description_
+        """
         if os.path.isabs(path):
             abspath = path
         else:
@@ -44,6 +55,16 @@ class DiskReaderWriter(AbsReaderWriter):
             raise ValueError("Invalid mode. Use 'text' or 'binary'.")
 
     def read_offset(self, path: str, offset=0, limit=None):
+        """从文件指定位置读取内容
+
+        Args:
+            path (str): _description_
+            offset (int, optional): _description_. Defaults to 0.
+            limit (_type_, optional): _description_. Defaults to None.
+
+        Returns:
+            _type_: _description_
+        """
         abspath = path
         if not os.path.isabs(path):
             abspath = os.path.join(self.path, path)
