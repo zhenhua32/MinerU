@@ -4,6 +4,8 @@ from pydantic import BaseModel, Field
 
 
 # rag
+# layout 的 category_id 定义. 但这个和文档里显示的不一样
+# https://github.com/opendatalab/MinerU/blob/master/docs/output_file_zh_cn.md#some_pdf_modeljson
 class CategoryType(Enum):  # py310 not support StrEnum
     text = 'text'
     title = 'title'

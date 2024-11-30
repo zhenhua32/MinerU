@@ -5,16 +5,28 @@ from magic_pdf.libs.ocr_content_type import BlockType, CategoryId, ContentType
 from magic_pdf.model.magic_model import MagicModel
 
 
-def draw_bbox_without_number(i, bbox_list, page, rgb_config, fill_config):
+def draw_bbox_without_number(i: int, bbox_list: list, page, rgb_config: list, fill_config: bool):
+    """画框
+
+    Args:
+        i (int): 页数索引
+        bbox_list (list): bbox 列表
+        page (Document): Document page
+        rgb_config (list): 颜色
+        fill_config (bool): 是否填充
+    """
+    # 颜色需要转换成 0-1 之间的小数
     new_rgb = []
     for item in rgb_config:
         item = float(item) / 255
         new_rgb.append(item)
-    page_data = bbox_list[i]
+    page_data = bbox_list[i]  # 第 i 页的 bbox 列表
     for bbox in page_data:
         x0, y0, x1, y1 = bbox
+        # 定义矩形, 左上, 右下
         rect_coords = fitz.Rect(x0, y0, x1, y1)  # Define the rectangle
         if fill_config:
+            # 填充版本
             page.draw_rect(
                 rect_coords,
                 color=None,
@@ -24,6 +36,7 @@ def draw_bbox_without_number(i, bbox_list, page, rgb_config, fill_config):
                 overlay=True,
             )  # Draw the rectangle
         else:
+            # 非填充版本
             page.draw_rect(
                 rect_coords,
                 color=new_rgb,
@@ -34,7 +47,17 @@ def draw_bbox_without_number(i, bbox_list, page, rgb_config, fill_config):
             )  # Draw the rectangle
 
 
-def draw_bbox_with_number(i, bbox_list, page, rgb_config, fill_config, draw_bbox=True):
+def draw_bbox_with_number(i: int, bbox_list: list, page, rgb_config: list, fill_config: bool, draw_bbox=True):
+    """画框, 附带序号
+
+    Args:
+        i (_type_): _description_
+        bbox_list (_type_): _description_
+        page (_type_): _description_
+        rgb_config (_type_): _description_
+        fill_config (_type_): _description_
+        draw_bbox (bool, optional): _description_. Defaults to True.
+    """
     new_rgb = []
     for item in rgb_config:
         item = float(item) / 255
@@ -62,12 +85,21 @@ def draw_bbox_with_number(i, bbox_list, page, rgb_config, fill_config, draw_bbox
                     width=0.5,
                     overlay=True,
                 )  # Draw the rectangle
+        # 加个数字
         page.insert_text(
             (x1 + 2, y0 + 10), str(j + 1), fontsize=10, color=new_rgb
         )  # Insert the index in the top left corner of the rectangle
 
 
-def draw_layout_bbox(pdf_info, pdf_bytes, out_path, filename):
+def draw_layout_bbox(pdf_info: list, pdf_bytes: bytes, out_path: str, filename: str):
+    """画布局框，附带排序结果
+
+    Args:
+        pdf_info (list): pipe.pipe_parse 调用后返回的结果
+        pdf_bytes (bytes): pdf 文件的二进制数据
+        out_path (str): 输出目录
+        filename (str): 文件名
+    """
     dropped_bbox_list = []
     tables_list, tables_body_list = [], []
     tables_caption_list, tables_footnote_list = [], []
@@ -79,7 +111,9 @@ def draw_layout_bbox(pdf_info, pdf_bytes, out_path, filename):
     lists_list = []
     indexs_list = []
     for page in pdf_info:
+        # 按页面处理
 
+        # 初始化
         page_dropped_list = []
         tables, tables_body, tables_caption, tables_footnote = [], [], [], []
         imgs, imgs_body, imgs_caption, imgs_footnote = [], [], [], []
@@ -89,14 +123,18 @@ def draw_layout_bbox(pdf_info, pdf_bytes, out_path, filename):
         lists = []
         indices = []
 
+        # 丢弃的表格的 bbox
         for dropped_bbox in page['discarded_blocks']:
             page_dropped_list.append(dropped_bbox['bbox'])
         dropped_bbox_list.append(page_dropped_list)
+
+        # 逐个处理每个 block. para_blocks 是分段后的结果
         for block in page['para_blocks']:
             bbox = block['bbox']
             if block['type'] == BlockType.Table:
                 tables.append(bbox)
                 for nested_block in block['blocks']:
+                    # 处理内嵌表格, 一个表格可能由 表格体, 表格标题, 表格脚注 组成
                     bbox = nested_block['bbox']
                     if nested_block['type'] == BlockType.TableBody:
                         tables_body.append(bbox)
@@ -107,6 +145,7 @@ def draw_layout_bbox(pdf_info, pdf_bytes, out_path, filename):
             elif block['type'] == BlockType.Image:
                 imgs.append(bbox)
                 for nested_block in block['blocks']:
+                    # 图像也是同样的处理方式
                     bbox = nested_block['bbox']
                     if nested_block['type'] == BlockType.ImageBody:
                         imgs_body.append(bbox)
@@ -118,7 +157,7 @@ def draw_layout_bbox(pdf_info, pdf_bytes, out_path, filename):
                 titles.append(bbox)
             elif block['type'] == BlockType.Text:
                 texts.append(bbox)
-            elif block['type'] == BlockType.InterlineEquation:
+            elif block['type'] == BlockType.InterlineEquation:  # 行间公式块
                 interequations.append(bbox)
             elif block['type'] == BlockType.List:
                 lists.append(bbox)
@@ -139,6 +178,7 @@ def draw_layout_bbox(pdf_info, pdf_bytes, out_path, filename):
         lists_list.append(lists)
         indexs_list.append(indices)
 
+    # 这个是按顺序全部加进来, 前面是按类型分开的
     layout_bbox_list = []
 
     table_type_order = {
@@ -189,6 +229,7 @@ def draw_layout_bbox(pdf_info, pdf_bytes, out_path, filename):
         draw_bbox_without_number(i, lists_list, page, [40, 169, 92], True)
         draw_bbox_without_number(i, indexs_list, page, [40, 169, 92], True)
 
+        # 这个是标记数字的
         draw_bbox_with_number(
             i, layout_bbox_list, page, [255, 0, 0], False, draw_bbox=False
         )

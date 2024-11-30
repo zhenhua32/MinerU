@@ -9,6 +9,11 @@ from magic_pdf.data.utils import fitz_doc_to_image
 
 
 class PageableData(ABC):
+    """单页面数据
+
+    Args:
+        ABC (_type_): _description_
+    """
     @abstractmethod
     def get_image(self) -> dict:
         """Transform data to image."""
@@ -30,6 +35,11 @@ class PageableData(ABC):
 
 
 class Dataset(ABC):
+    """整个文档数据
+
+    Args:
+        ABC (_type_): _description_
+    """
     @abstractmethod
     def __len__(self) -> int:
         """The length of the dataset."""
@@ -68,6 +78,11 @@ class Dataset(ABC):
 
 
 class PymuDocDataset(Dataset):
+    """基于 PyMuPDF 的实现
+
+    Args:
+        Dataset (_type_): _description_
+    """
     def __init__(self, bits: bytes):
         """Initialize the dataset, which wraps the pymudoc documents.
 
@@ -113,6 +128,7 @@ class PymuDocDataset(Dataset):
 class ImageDataset(Dataset):
     def __init__(self, bits: bytes):
         """Initialize the dataset, which wraps the pymudoc documents.
+        图片形式的
 
         Args:
             bits (bytes): the bytes of the photo which will be converted to pdf first. then converted to pymudoc.
@@ -169,6 +185,7 @@ class Doc(PageableData):
                 height: int
             }
         """
+        # 转图片可以一看
         return fitz_doc_to_image(self._doc)
 
     def get_doc(self) -> fitz.Page:
@@ -187,8 +204,10 @@ class Doc(PageableData):
         """
         page_w = self._doc.rect.width
         page_h = self._doc.rect.height
+        # 就返回一个页面的宽高
         return PageInfo(w=page_w, h=page_h)
 
     def __getattr__(self, name):
+        """属性从 _doc 中获取"""
         if hasattr(self._doc, name):
             return getattr(self._doc, name)
