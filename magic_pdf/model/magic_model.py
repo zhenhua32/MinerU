@@ -28,6 +28,9 @@ class PosRelationEnum(enum.Enum):
 
 
 class MagicModel:
+    """
+    这也是主要的类, 深入看一下
+    """
     """每个函数没有得到元素的时候返回空list."""
 
     def __fix_axis(self):

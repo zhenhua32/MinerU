@@ -326,7 +326,15 @@ def draw_span_bbox(pdf_info, pdf_bytes, out_path, filename):
     pdf_docs.save(f'{out_path}/{filename}_spans.pdf')
 
 
-def draw_model_bbox(model_list: list, pdf_bytes, out_path, filename):
+def draw_model_bbox(model_list: list, pdf_bytes: bytes, out_path: str, filename: str):
+    """画模型结果的框
+
+    Args:
+        model_list (list): layout 模型结果
+        pdf_bytes (bytes): pdf 文件的二进制数据
+        out_path (str): 输出目录
+        filename (str): 文件名
+    """
     dropped_bbox_list = []
     tables_body_list, tables_caption_list, tables_footnote_list = [], [], []
     imgs_body_list, imgs_caption_list, imgs_footnote_list = [], [], []
@@ -336,6 +344,7 @@ def draw_model_bbox(model_list: list, pdf_bytes, out_path, filename):
     pdf_docs = fitz.open('pdf', pdf_bytes)
     magic_model = MagicModel(model_list, PymuDocDataset(pdf_bytes))
     for i in range(len(model_list)):
+        # 按页处理, i 是页数索引
         page_dropped_list = []
         tables_body, tables_caption, tables_footnote = [], [], []
         imgs_body, imgs_caption, imgs_footnote = [], [], []
@@ -343,6 +352,7 @@ def draw_model_bbox(model_list: list, pdf_bytes, out_path, filename):
         texts = []
         interequations = []
         page_info = magic_model.get_model_list(i)
+        # 获取到 page_info 后和上面的 draw_layout_bbox 处理方式一样
         layout_dets = page_info['layout_dets']
         for layout_det in layout_dets:
             bbox = layout_det['bbox']

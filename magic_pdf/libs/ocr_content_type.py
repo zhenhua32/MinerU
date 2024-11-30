@@ -24,6 +24,7 @@ class BlockType:
     Index = 'index'
 
 
+# 原来 id 是在这里定义的, 前面看到的是 CategoryType
 class CategoryId:
     Title = 0
     Text = 1
