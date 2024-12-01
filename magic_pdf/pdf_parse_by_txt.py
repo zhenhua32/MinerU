@@ -12,6 +12,20 @@ def parse_pdf_by_txt(
     debug_mode=False,
     lang=None,
 ):
+    """解析文本类的 pdf
+
+    Args:
+        pdf_bytes (bytes): pdf 文件的二进制内容
+        model_list (list): layout 模型推理结果
+        imageWriter (FileBasedDataWriter): 图片写入器
+        start_page_id (int, optional): 起始页. Defaults to 0.
+        end_page_id (int, optional): 结束页. Defaults to None.
+        debug_mode (bool, optional): 开启调试模式. Defaults to False.
+        lang (str, optional): 语言. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
     dataset = PymuDocDataset(pdf_bytes)
     return pdf_parse_union(dataset,
                            model_list,

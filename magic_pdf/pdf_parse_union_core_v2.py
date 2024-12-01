@@ -763,14 +763,17 @@ def parse_page_core(
 
 def pdf_parse_union(
     dataset: Dataset,
-    model_list,
+    model_list: list,
     imageWriter,
-    parse_mode,
+    parse_mode: SupportedPdfParseMethod,
     start_page_id=0,
     end_page_id=None,
     debug_mode=False,
     lang=None,
 ):
+    """
+    调用统一的 pdf 解析函数
+    """
     pdf_bytes_md5 = compute_md5(dataset.data_bits())
 
     """初始化空的pdf_info_dict"""
@@ -780,6 +783,7 @@ def pdf_parse_union(
     magic_model = MagicModel(model_list, dataset)
 
     """根据输入的起始范围解析pdf"""
+    # end_page_id 改成正数
     # end_page_id = end_page_id if end_page_id else len(pdf_docs) - 1
     end_page_id = (
         end_page_id
@@ -794,6 +798,7 @@ def pdf_parse_union(
     """初始化启动时间"""
     start_time = time.time()
 
+    # 按页处理
     for page_id, page in enumerate(dataset):
         """debug时输出每页解析的耗时."""
         if debug_mode:
@@ -805,6 +810,7 @@ def pdf_parse_union(
 
         """解析pdf中的每一页"""
         if start_page_id <= page_id <= end_page_id:
+            # 解析一页的数据
             page_info = parse_page_core(
                 page, magic_model, page_id, pdf_bytes_md5, imageWriter, parse_mode, lang
             )
