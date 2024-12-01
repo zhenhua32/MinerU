@@ -28,11 +28,11 @@ class UNIPipe(AbsPipe):
             image_writer (AbsReaderWriter): 图像写入器
             is_debug (bool, optional): 开启 debug 模式. Defaults to False.
             start_page_id (int, optional): 起始页索引. Defaults to 0.
-            end_page_id (_type_, optional): 结束页索引. Defaults to None.
-            lang (_type_, optional): 语言. Defaults to None.
-            layout_model (_type_, optional): layout 模型. Defaults to None.
-            formula_enable (_type_, optional): 是否启用公式识别. Defaults to None.
-            table_enable (_type_, optional): 是否启用表格识别. Defaults to None.
+            end_page_id (int, optional): 结束页索引. Defaults to None.
+            lang (str, optional): 语言. Defaults to None.
+            layout_model (str, optional): layout 模型. Defaults to None.
+            formula_enable (bool, optional): 是否启用公式识别. Defaults to None.
+            table_enable (bool, optional): 是否启用表格识别. Defaults to None.
         """
         self.pdf_type = jso_useful_key["_pdf_type"]
         super().__init__(pdf_bytes, jso_useful_key["model_list"], image_writer, is_debug, start_page_id, end_page_id,
@@ -83,7 +83,7 @@ class UNIPipe(AbsPipe):
 
         Args:
             img_parent_path (str): _description_
-            drop_mode (_type_, optional): _description_. Defaults to DropMode.NONE_WITH_REASON.
+            drop_mode (DropMode, optional): _description_. Defaults to DropMode.NONE_WITH_REASON.
 
         Returns:
             _type_: _description_
@@ -97,8 +97,8 @@ class UNIPipe(AbsPipe):
 
         Args:
             img_parent_path (str): 图片目录
-            drop_mode (_type_, optional): _description_. Defaults to DropMode.WHOLE_PDF.
-            md_make_mode (_type_, optional): _description_. Defaults to MakeMode.MM_MD.
+            drop_mode (DropMode, optional): _description_. Defaults to DropMode.WHOLE_PDF.
+            md_make_mode (MakeMode, optional): _description_. Defaults to MakeMode.MM_MD.
 
         Returns:
             _type_: _description_

@@ -16,6 +16,14 @@ def dict_compare(d1, d2):
 
 
 def remove_duplicates_dicts(lst):
+    """移除重复的字典
+
+    Args:
+        lst (list): _description_
+
+    Returns:
+        list: _description_
+    """
     unique_dicts = []
     for dict_item in lst:
         if not any(
@@ -26,6 +34,17 @@ def remove_duplicates_dicts(lst):
 
 
 def load_images_from_pdf(pdf_bytes: bytes, dpi=200, start_page_id=0, end_page_id=None) -> list:
+    """将 pdf 页面转换为图像
+
+    Args:
+        pdf_bytes (bytes): _description_
+        dpi (int, optional): _description_. Defaults to 200.
+        start_page_id (int, optional): _description_. Defaults to 0.
+        end_page_id (int, optional): _description_. Defaults to None.
+
+    Returns:
+        list: _description_
+    """
     try:
         from PIL import Image
     except ImportError:
@@ -35,15 +54,18 @@ def load_images_from_pdf(pdf_bytes: bytes, dpi=200, start_page_id=0, end_page_id
     images = []
     with fitz.open("pdf", pdf_bytes) as doc:
         pdf_page_num = doc.page_count
+        # end_page_id 重置为正数
         end_page_id = end_page_id if end_page_id is not None and end_page_id >= 0 else pdf_page_num - 1
         if end_page_id > pdf_page_num - 1:
             logger.warning("end_page_id is out of range, use images length")
             end_page_id = pdf_page_num - 1
 
+        # 遍历每一页
         for index in range(0, doc.page_count):
             if start_page_id <= index <= end_page_id:
                 page = doc[index]
                 mat = fitz.Matrix(dpi / 72, dpi / 72)
+                # 将页面转换为图像
                 pm = page.get_pixmap(matrix=mat, alpha=False)
 
                 # If the width or height exceeds 4500 after scaling, do not scale further.
@@ -85,10 +107,10 @@ def custom_model_init(ocr: bool = False, show_log: bool = False, lang=None,
     Args:
         ocr (bool, optional): _description_. Defaults to False.
         show_log (bool, optional): _description_. Defaults to False.
-        lang (_type_, optional): _description_. Defaults to None.
-        layout_model (_type_, optional): _description_. Defaults to None.
-        formula_enable (_type_, optional): _description_. Defaults to None.
-        table_enable (_type_, optional): _description_. Defaults to None.
+        lang (str, optional): _description_. Defaults to None.
+        layout_model (str, optional): _description_. Defaults to None.
+        formula_enable (bool, optional): _description_. Defaults to None.
+        table_enable (bool, optional): _description_. Defaults to None.
 
     Returns:
         _type_: _description_
@@ -163,11 +185,11 @@ def doc_analyze(pdf_bytes: bytes, ocr: bool = False, show_log: bool = False,
         ocr (bool, optional): 是否使用 ocr. Defaults to False.
         show_log (bool, optional): 显示日志. Defaults to False.
         start_page_id (int, optional): 开始页数. Defaults to 0.
-        end_page_id (_type_, optional): 结束页数. Defaults to None.
-        lang (_type_, optional): 语言. Defaults to None.
-        layout_model (_type_, optional): layout 模型. Defaults to None.
-        formula_enable (_type_, optional): 启用公式识别. Defaults to None.
-        table_enable (_type_, optional): 启用表格识别. Defaults to None.
+        end_page_id (int, optional): 结束页数. Defaults to None.
+        lang (str, optional): 语言. Defaults to None.
+        layout_model (str, optional): layout 模型. Defaults to None.
+        formula_enable (bool, optional): 启用公式识别. Defaults to None.
+        table_enable (bool, optional): 启用表格识别. Defaults to None.
 
     Returns:
         _type_: _description_
@@ -181,12 +203,14 @@ def doc_analyze(pdf_bytes: bytes, ocr: bool = False, show_log: bool = False,
     custom_model = model_manager.get_model(ocr, show_log, lang, layout_model, formula_enable, table_enable)
 
     with fitz.open("pdf", pdf_bytes) as doc:
+        # 文件页数
         pdf_page_num = doc.page_count
         end_page_id = end_page_id if end_page_id is not None and end_page_id >= 0 else pdf_page_num - 1
         if end_page_id > pdf_page_num - 1:
             logger.warning("end_page_id is out of range, use images length")
             end_page_id = pdf_page_num - 1
 
+    # 将 pdf 按页转换成图片列表
     images = load_images_from_pdf(pdf_bytes, start_page_id=start_page_id, end_page_id=end_page_id)
 
     model_json = []
@@ -198,6 +222,7 @@ def doc_analyze(pdf_bytes: bytes, ocr: bool = False, show_log: bool = False,
         page_height = img_dict["height"]
         if start_page_id <= index <= end_page_id:
             page_start = time.time()
+            # 调用模型
             result = custom_model(img)
             logger.info(f'-----page_id : {index}, page total time: {round(time.time() - page_start, 2)}-----')
         else:
@@ -206,6 +231,7 @@ def doc_analyze(pdf_bytes: bytes, ocr: bool = False, show_log: bool = False,
         page_dict = {"layout_dets": result, "page_info": page_info}
         model_json.append(page_dict)
 
+    # 时间统计
     gc_start = time.time()
     clean_memory()
     gc_time = round(time.time() - gc_start, 2)

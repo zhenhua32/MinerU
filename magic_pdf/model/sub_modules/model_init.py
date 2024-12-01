@@ -48,6 +48,16 @@ def mfr_model_init(weight_dir, cfg_path, device='cpu'):
 
 
 def layout_model_init(weight, config_file, device):
+    """加载 layout 模型
+
+    Args:
+        weight (str): 权重文件路径
+        config_file (str): 配置文件的路径
+        device (str): 设备
+
+    Returns:
+        _type_: _description_
+    """
     model = Layoutlmv3_Predictor(weight, config_file, device)
     return model
 
@@ -83,6 +93,11 @@ def ocr_model_init(show_log: bool = False,
 
 
 class AtomModelSingleton:
+    """又建了一个模型单例类, 可能和 ModelSingleton 有点重复
+
+    Returns:
+        _type_: _description_
+    """
     _instance = None
     _models = {}
 
@@ -94,6 +109,7 @@ class AtomModelSingleton:
     def get_atom_model(self, atom_model_name: str, **kwargs):
         lang = kwargs.get('lang', None)
         layout_model_name = kwargs.get('layout_model_name', None)
+        # key 是由这些构成的
         key = (atom_model_name, layout_model_name, lang)
         if key not in self._models:
             self._models[key] = atom_model_init(model_name=atom_model_name, **kwargs)
@@ -101,8 +117,17 @@ class AtomModelSingleton:
 
 
 def atom_model_init(model_name: str, **kwargs):
+    """模型初始化的辅助函数
+
+    Args:
+        model_name (str): _description_
+
+    Returns:
+        _type_: _description_
+    """
     atom_model = None
     if model_name == AtomicModel.Layout:
+        # layout 有两种模型可选
         if kwargs.get('layout_model_name') == MODEL_NAME.LAYOUTLMv3:
             atom_model = layout_model_init(
                 kwargs.get('layout_weights'),

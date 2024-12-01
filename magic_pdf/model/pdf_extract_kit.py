@@ -120,18 +120,18 @@ class CustomPEKModel:
         # 初始化layout模型
         if self.layout_model_name == MODEL_NAME.LAYOUTLMv3:
             self.layout_model = atom_model_manager.get_atom_model(
-                atom_model_name=AtomicModel.Layout,
-                layout_model_name=MODEL_NAME.LAYOUTLMv3,
+                atom_model_name=AtomicModel.Layout,  # 模型类型
+                layout_model_name=MODEL_NAME.LAYOUTLMv3,  # 具体模型名字
                 layout_weights=str(
                     os.path.join(
                         models_dir, self.configs['weights'][self.layout_model_name]
                     )
-                ),
+                ),  # 权重文件的路径
                 layout_config_file=str(
                     os.path.join(
                         model_config_dir, 'layoutlmv3', 'layoutlmv3_base_inference.yaml'
                     )
-                ),
+                ),  # 配置文件的路径
                 device=self.device,
             )
         elif self.layout_model_name == MODEL_NAME.DocLayout_YOLO:

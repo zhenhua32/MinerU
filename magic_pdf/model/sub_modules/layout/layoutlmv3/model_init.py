@@ -107,6 +107,13 @@ class DotDict(dict):
 
 
 class Layoutlmv3_Predictor(object):
+    """初始化模型预测器
+
+    内部使用了 detectron2 库
+
+    Args:
+        object (_type_): _description_
+    """
     def __init__(self, weights, config_file, device):
         layout_args = {
             "config_file": config_file,
@@ -138,13 +145,14 @@ class Layoutlmv3_Predictor(object):
         for bbox_idx in range(len(boxes)):
             if labels[bbox_idx] in ignore_catids:
                 continue
+            # 单个 bbox 只有四个点, 分别是 (x0, y0), (x1, y1)
             layout_dets.append({
                 "category_id": labels[bbox_idx],
                 "poly": [
-                    boxes[bbox_idx][0], boxes[bbox_idx][1],
-                    boxes[bbox_idx][2], boxes[bbox_idx][1],
-                    boxes[bbox_idx][2], boxes[bbox_idx][3],
-                    boxes[bbox_idx][0], boxes[bbox_idx][3],
+                    boxes[bbox_idx][0], boxes[bbox_idx][1],  # 左上 (x0, y0)
+                    boxes[bbox_idx][2], boxes[bbox_idx][1],  # 右上, (x1, y0)
+                    boxes[bbox_idx][2], boxes[bbox_idx][3],  # 右下, (x1, y1)
+                    boxes[bbox_idx][0], boxes[bbox_idx][3],  # 左下, (x0, y1)
                 ],
                 "score": scores[bbox_idx]
             })
