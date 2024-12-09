@@ -423,6 +423,17 @@ def insert_lines_into_block(block_bbox, line_height, page_w, page_h):
 
 
 def sort_lines_by_model(fix_blocks, page_w, page_h, line_height):
+    """调用模型进行 block 排序
+
+    Args:
+        fix_blocks (list): _description_
+        page_w (float): 页面宽度
+        page_h (float): 页面高度
+        line_height (float): 行高
+
+    Returns:
+        list: _description_
+    """
     page_line_list = []
     for block in fix_blocks:
         if block['type'] in [
@@ -441,6 +452,7 @@ def sort_lines_by_model(fix_blocks, page_w, page_h, line_height):
                     bbox = line['bbox']
                     page_line_list.append(bbox)
         elif block['type'] in [BlockType.ImageBody, BlockType.TableBody]:
+            # 处理图表
             bbox = block['bbox']
             block['real_lines'] = copy.deepcopy(block['lines'])
             lines = insert_lines_into_block(bbox, line_height, page_w, page_h)
@@ -488,9 +500,12 @@ def sort_lines_by_model(fix_blocks, page_w, page_h, line_height):
         ), f'Invalid box. right: {right}, left: {left}, bottom: {bottom}, top: {top}'  # noqa: E126, E121
         boxes.append([left, top, right, bottom])
     model_manager = ModelSingleton()
+    # 在这里获取 阅读顺序 模型并调用
     model = model_manager.get_model('layoutreader')
     with torch.no_grad():
+        # 获取顺序
         orders = do_predict(boxes, model)
+    # 排序
     sorted_bboxes = [page_line_list[i] for i in orders]
 
     return sorted_bboxes
@@ -815,6 +830,7 @@ def pdf_parse_union(
                 page, magic_model, page_id, pdf_bytes_md5, imageWriter, parse_mode, lang
             )
         else:
+            # 填充空的
             page_info = page.get_page_info()
             page_w = page_info.w
             page_h = page_info.h
